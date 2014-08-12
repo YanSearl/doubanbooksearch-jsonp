@@ -1,0 +1,223 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<link href="css/bootstrap.min.css" rel="stylesheet" />
+<title>无标题文档</title>
+<script>
+window.onload = function() {
+	
+	var oQ = document.getElementById('q');
+	var oBtnSearch = document.getElementById('btnSearch');
+	var oList = document.getElementById('list');
+	var oSerachResultText = document.getElementById('serachResultText');
+	var oPages = document.getElementById('pages');
+	
+	var sSearchValue = '';
+	var iStartIndex = 1;
+	var iMaxResults = 10;
+	
+	var iCount = 0;
+	var iPages = 0;
+	var iPage = 1;
+	
+	//搜索
+	oBtnSearch.onclick = getData;
+	
+	function getData() {
+		sSearchValue = oQ.value;
+		
+		iStartIndex = (iPage - 1) * iMaxResults + 1;
+		
+		var oScript = document.createElement('script');
+		oScript.src = 'http://api.douban.com/book/subjects?q='+sSearchValue+'&alt=xd&callback=fnSearchList&max-results=' + iMaxResults + '&start-index=' + iStartIndex;
+		document.body.appendChild(oScript);
+	}
+	
+	//回调函数的处理
+	window.fnSearchList = function(jData) {
+		
+		iCount = jData['opensearch:totalResults'].$t;
+		
+		oSerachResultText.innerHTML = '搜索结果'+iStartIndex+'-'+ (iStartIndex + iMaxResults - 1) +'   共' + iCount;
+		
+		var entry = jData.entry;
+		if (entry.length) {
+			
+			//留言的接口ulr：entry[i].link[0].@href + review
+			//如：http://api.douban.com/book/subject/3590768/review?alt=xd&callback=fncomment
+			
+			oList.innerHTML = '';
+			
+			for (var i=0; i<entry.length; i++) {
+				var oDl = document.createElement('dl');
+				oDl.className = 'dl-horizontal';
+				
+				var oDt = document.createElement('dt');
+				
+				var oImg = document.createElement('img');
+				oImg.className = 'img-rounded';
+				oImg.src = entry[i].link[2]['@href'];
+				oDt.appendChild(oImg);
+				
+				var oDd = document.createElement('dd');
+				
+				var html = '<h4>'+entry[i].title.$t+'</h4>';
+				html += '<ul>';
+					html += '<li>作者：'+getAtrr(entry[i]['db:attribute'], 'author')+'</li>';
+					html += '<li>出版社：'+getAtrr(entry[i]['db:attribute'], 'publisher')+'</li>';
+					html += '<li>译者：'+getAtrr(entry[i]['db:attribute'], 'translator')+'</li>';
+					html += '<li>出版年：'+getAtrr(entry[i]['db:attribute'], 'pubdate')+'</li>';
+					html += '<li>定价：'+getAtrr(entry[i]['db:attribute'], 'price')+'</li>';
+					html += '<li>ISBN：'+getAtrr(entry[i]['db:attribute'], 'isbn10')+'</li>';
+				html += '</ul>';
+				oDd.innerHTML = html;
+				
+				oDl.appendChild(oDt);
+				oDl.appendChild(oDd);
+				
+				oList.appendChild(oDl);
+			}
+			
+		}
+		
+		//处理分页
+		iPages = Math.ceil(iCount / iMaxResults);
+		
+		var p = createPageList(iPage, iPages, 5);
+		
+		console.log(p);
+		
+		var iPrev = Math.max(iPage - 1, 1);
+		var iNext = Math.min(iPage + 1, iPages);
+		
+		var html = '<li><a href="#" _index="'+iPrev+'">&laquo;</a></li>';
+		for (var i=p.min; i<=p.max; i++) {
+			if (i == iPage) {
+				html += '<li class="active" _index="'+i+'"><a href="#">'+i+'</a></li>';
+			} else {
+				html += '<li><a href="#" _index="'+i+'">'+i+'</a></li>';
+			}
+		}
+		html += '<li><a href="#" _index="'+iNext+'">&raquo;</a></li>';
+		
+		oPages.innerHTML = html;
+		
+		var aA = oPages.getElementsByTagName('a');
+		
+		for (var i=0; i<aA.length; i++) {
+			aA[i].onclick = function() {
+				//alert(this.getAttribute('_index'));
+				
+				iPage = parseInt(this.getAttribute('_index'));
+				
+				getData();
+				
+				return false;
+			}
+		}
+		
+	}
+	
+	function getAtrr(data,name) {
+		var v = '';
+		for (var i=0; i<data.length; i++) {
+			if (data[i]['@name'] == name) {
+				v += data[i]['$t'] + ' ';
+			}
+		}
+		return v;
+	}
+	
+	//console.log( createPageList(3, 10, 5) );
+	
+	function createPageList(page, pages, num) {
+		
+		var page = page;
+		var pages = pages;
+		var num = num;
+		
+		console.log(page + '/' + pages + '/' + num);
+		
+		var il = Math.floor(num / 2);
+		var ir = il;
+		
+		var iLeft = page - il;
+		
+		if (iLeft < 1) {
+			iLeft = 1;
+			ir = num - (page - iLeft) - 1;
+		}
+		
+		console.log(typeof page + '/' + typeof ir);
+		var iRight = page + ir;
+		
+		if (iRight > pages) {
+			ir = iRight - pages;
+			iRight = pages;
+			iLeft = Math.max(iLeft - ir, 1);
+		}
+		
+		return {
+			min : iLeft,
+			max : iRight
+		}
+	}
+	
+}
+</script>
+</head>
+
+<body>
+	<div class="container">
+    	<h1>豆瓣</h1>
+        
+        <div class="input-group input-group-lg">
+            <input type="text" class="form-control" placeholder="请输入您要搜索的关键字" id="q">
+            <span class="input-group-addon" id="btnSearch"><span class="glyphicon glyphicon-search"></span> 搜索</span>
+        </div>
+        
+        <div class="rows">
+        	<div class="col-md-12 text-right" id="serachResultText"></div>
+        </div>
+        
+        <div class="rows">
+        	<div class="col-md-12" id="list">
+        	<!--<dl class="dl-horizontal">
+                <dt>
+                    <img src="http://img3.douban.com/mpic/s3651235.jpg" alt="..." class="img-rounded">
+                </dt>
+                <dd>
+                    111111111
+                </dd>
+            </dl>
+            
+            <dl class="dl-horizontal">
+                <dt>
+                    <img src="http://img3.douban.com/mpic/s3651235.jpg" alt="..." class="img-rounded">
+                </dt>
+                <dd>
+                    111111111
+                </dd>
+            </dl>-->
+            </div>
+        </div>
+        
+        <ul class="pagination" id="pages">
+        
+        </ul>
+        
+        <!--<ul class="pagination">
+            <li><a href="#">&laquo;</a></li>
+            <li><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#">&raquo;</a></li>
+        </ul>-->
+        
+    </div>
+</body>
+</html>
