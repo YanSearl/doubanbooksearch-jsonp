@@ -4,7 +4,7 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
 <link href="css/bootstrap.min.css" rel="stylesheet" />
-<title>无标题文档</title>
+<title>仿豆瓣图书搜索</title>
 <script>
 window.onload = function() {
 	
@@ -44,10 +44,7 @@ window.onload = function() {
 		
 		var entry = jData.entry;
 		if (entry.length) {
-			
-			//留言的接口ulr：entry[i].link[0].@href + review
-			//如：http://api.douban.com/book/subject/3590768/review?alt=xd&callback=fncomment
-			
+						
 			oList.innerHTML = '';
 			
 			for (var i=0; i<entry.length; i++) {
@@ -79,16 +76,13 @@ window.onload = function() {
 				
 				oList.appendChild(oDl);
 			}
-			
 		}
 		
 		//处理分页
 		iPages = Math.ceil(iCount / iMaxResults);
 		
 		var p = createPageList(iPage, iPages, 5);
-		
-		console.log(p);
-		
+			
 		var iPrev = Math.max(iPage - 1, 1);
 		var iNext = Math.min(iPage + 1, iPages);
 		
@@ -108,7 +102,6 @@ window.onload = function() {
 		
 		for (var i=0; i<aA.length; i++) {
 			aA[i].onclick = function() {
-				//alert(this.getAttribute('_index'));
 				
 				iPage = parseInt(this.getAttribute('_index'));
 				
@@ -117,7 +110,6 @@ window.onload = function() {
 				return false;
 			}
 		}
-		
 	}
 	
 	function getAtrr(data,name) {
@@ -130,15 +122,12 @@ window.onload = function() {
 		return v;
 	}
 	
-	//console.log( createPageList(3, 10, 5) );
 	
 	function createPageList(page, pages, num) {
 		
 		var page = page;
 		var pages = pages;
 		var num = num;
-		
-		console.log(page + '/' + pages + '/' + num);
 		
 		var il = Math.floor(num / 2);
 		var ir = il;
@@ -188,8 +177,7 @@ window.onload = function() {
                 <dt>
                     <img src="http://img3.douban.com/mpic/s3651235.jpg" alt="..." class="img-rounded">
                 </dt>
-                <dd>
-                    111111111
+                <dd> 
                 </dd>
             </dl>
             
@@ -197,8 +185,7 @@ window.onload = function() {
                 <dt>
                     <img src="http://img3.douban.com/mpic/s3651235.jpg" alt="..." class="img-rounded">
                 </dt>
-                <dd>
-                    111111111
+                <dd>  
                 </dd>
             </dl>-->
             </div>
